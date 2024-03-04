@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 {
   if (argc > 2){		//checks if there are more arguments provided than needed
 	  perror("More arguments than needed");
-	  return -1
+	  return -1;
   }
   int var;			//aux variable to detect errors
   var = mywc(argv[1]);		//calls function mywc

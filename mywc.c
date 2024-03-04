@@ -8,12 +8,14 @@
 #include <string.h>
 
 int mywc(char *filename){
-    if (sizeof(filename)==0){		//checks that the filename is not empty
+    if (filename==NULL){		//checks that the filename is not empty
+    	perror("Error, no input introduced");
         return -1;			//in case there is an error, function returns -1
     }
     
     int fd = open(filename,O_RDONLY);	//system call for opnening a file and only read
     if (fd == -1){			//checks if an error has ocurred onening the file
+	perror("Error opening file");
         return -1;			//in case there is an error, function returns -1
     }
     
@@ -40,12 +42,6 @@ int mywc(char *filename){
 
 int main(int argc, char *argv[])
 {
-	/*If less than two arguments (argv[0] -> program, argv[1] -> file to process) print an error and return -1*/
-	if(argc < 2)
-	{
-		printf("Too few arguments\n");
-		return -1;
-	}
   int var;			//aux variable to detect errors
   var = mywc(argv[1]);		//calls function mywc
   if (var == -1){		//checks if there are errors

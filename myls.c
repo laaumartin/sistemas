@@ -15,6 +15,7 @@ int myls(const char *dirname){
         direct=opendir(buffer);			//opens current directory
     }
     if (direct == NULL) {			//checks if there was an error opening directory
+	perror("Error opening directory");
         return -1;				//if there was an error, returns -1
     }
     struct dirent *entry;			//pointer that represents an entry of a directory

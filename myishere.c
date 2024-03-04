@@ -1,5 +1,3 @@
-//P1-SSOO-23/24
-
 #include <stdio.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -7,51 +5,43 @@
 
 
 int myishere(const char *dirname , const char *filename){
-    if((dirname==NULL)||(filename==NULL)){
+    if((dirname==NULL)||(filename==NULL)){		//checks if there are enough arguments provided
         perror("Not enough arguments provided");
-        return -1;
+        return -1;					//returns -1 if not enough arguments 	
     }else{
         DIR *direct;
-        direct= opendir(dirname);
-        if(direct==NULL){
+        direct= opendir(dirname);			//opens specified directory
+        if(direct==NULL){				//checks if there is any error opening directory
             perror("Error opening directory");
-            return -1;
+            return -1;					//returns -1 if error
         }else{
-            int match=0;
+            int match=0;				//aux variable to indicate if file is in directory or not
             struct dirent *entry;
-            while(((entry = readdir(direct)) != NULL) && (match==0)){
-                const char *entryname=entry->d_name;
-                if(strcmp(filename,entryname)==0){
-                    match=1;
+            while(((entry = readdir(direct)) != NULL) && (match==0)){		//loop that reads each entry of directory
+                const char *entryname=entry->d_name;				//obtains current entry
+                if(strcmp(filename,entryname)==0){				//compares current entry with the input filename
+                    match=1;							//if they are equal saves 1 in match
                 }
             }
             if(match==1){
-                printf("File %s is in directory %s\n",filename,dirname);
+                printf("File %s is in directory %s\n",filename,dirname);	//if match = 1, file in directory
             }else{
-                printf("File %s is not in directory %s\n",filename,dirname);
+                printf("File %s is not in directory %s\n",filename,dirname);	//if match = 0, file is not in directory
             }
-            closedir(direct);
-            return 0;
+            closedir(direct);							//closes directory
+            return 0;								//if no error, returns 0
         }
     }
 }
 
-
-
 int main(int argc, char *argv[])
 {
-	/* If less than three arguments (argv[0] -> program, argv[1] -> directory to search, argv[2] -> file to find) print an error y return -1 */
-	if(argc < 3)
-	{
-		printf("Too few arguments\n");
-		return -1;
-	}
-  else if (argc > 3){
+  if (argc > 3){		//if more arguments provided -> error
     return -1;
   }
-  int var;
+  int var;			//auxiliary variable to recognize an error in the function
   var = myishere(argv[1],argv[2]);
-  if (var==-1){
+  if (var==-1){			//if there is an error, program returns -1
     return -1;
   }
 	return 0;

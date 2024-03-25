@@ -1,25 +1,15 @@
 CC=gcc
-
-CFLAGS=-Wall -Werror
-
+FLAGS=-Wno-implicit-function-declaration -g
+CFLAGS=-I.
+OBJ = msh.o 
+INC= parser.o
+LIBS=-lparser
 
 %.o: %.c 
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) $(FLAGS) -c -o $@ $< $(CFLAGS)
 
-
-all: wc ls ishere
-
-	
-wc:	mywc.o
-	$(CC) $(CFLAGS) -o mywc  mywc.o 
-
-ls: myls.o
-	$(CC) $(CFLAGS)  -o myls myls.o
-
-ishere:	myishere.o
-	$(CC) $(CFLAGS)  -o myishere  myishere.o
-
+msh: $(OBJ)
+	$(CC) $(FLAGS) -L. -o $@ $< $(LIBS) -Wl,-rpath=.
 
 clean:
-	rm -f mywc myishere myls
-	rm *.o
+	rm -f ./msh.o ./msh

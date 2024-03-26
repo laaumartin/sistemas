@@ -235,6 +235,51 @@ int main(int argc, char* argv[])
 				} 
             }
         }
+
+        //multiple commands
+        else if (command_counter > 1){
+
+            int pipes[command_counter - 1][2];  //create same number of pipes as many commands except of one
+
+            for (int i = 0; i < command_counter - 1; i++) {
+                if (pipe(pipes[i]) == -1) {
+                    perror("pipe");
+                    exit(EXIT_FAILURE);
+                }
+            }
+
+            int pid;
+            for (int i = 0; i < command_counter; i++) {
+                if ((pid = fork()) == -1) {
+                    perror("fork");
+                    exit(EXIT_FAILURE);
+                } else if (pid == 0) {  // child process
+                    if (i > 0) {
+                        dup2(pipes[i - 1][0], STDIN_FILENO);
+                        close(pipes[i - 1][0]);
+                        close(pipes[i - 1][1]);
+                    }
+                    if (i < command_counter - 1) {
+                        dup2(pipes[i][1], STDOUT_FILENO);
+                        close(pipes[i][0]);
+                        close(pipes[i][1]);
+                    }
+                    execvp(argvv[i][0], argvv[i]);
+                    perror("execvp");
+                    exit(EXIT_FAILURE);
+                }
+            }
+
+            for (int i = 0; i < command_counter - 1; i++) {
+                close(pipes[i][0]);
+                close(pipes[i][1]);
+            }
+
+            for (int i = 0; i < command_counter; i++) {
+                wait(NULL);
+            }
+            
+        }
     
 
 	}

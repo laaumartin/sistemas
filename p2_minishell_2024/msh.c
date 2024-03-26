@@ -226,8 +226,13 @@ int main(int argc, char* argv[])
                 break;
             
             default:  //parent proces
-                
-                while(wait(&status)!=pid);
+
+                if(in_background !=1){  // back to the parent waiting
+					while(pid !=wait (&status) );
+					
+				} else{     // back to the parent without waiting
+					printf("Pid = [%d]\n",getpid());
+				} 
             }
         }
     

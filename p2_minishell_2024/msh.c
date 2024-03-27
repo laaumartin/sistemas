@@ -275,9 +275,11 @@ int main(int argc, char* argv[])
                 close(pipes[i][1]);
             }
 
-            for (int i = 0; i < command_counter; i++) {
-                wait(NULL);
-            }
+            if (in_background==1){
+		    printf("Pid =[%d]\n",getpid())
+	
+            }else
+		    wait(NULL)
 
         }
 

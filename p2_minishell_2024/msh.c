@@ -267,16 +267,21 @@ int main(int argc, char* argv[])
                     execvp(argvv[i][0], argvv[i]);
                     perror("execvp");
                     exit(EXIT_FAILURE);
-                }
+                }else { //parent process
+			if (in_background!=1){//wait for the child
+				wait(NULL)
+			}
+		}
             }
 
             for (int i = 0; i < command_counter - 1; i++) {
                 close(pipes[i][0]);
                 close(pipes[i][1]);
             }
+	    if (in_background==1){ //don't wait for the child
+		    printf("the commands are beeing executed in background")
 
-            for (int i = 0; i < command_counter; i++) {
-                wait(NULL);
+           
             }
             
         }

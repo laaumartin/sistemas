@@ -195,6 +195,7 @@ int main(int argc, char* argv[])
 
 
 		/************************ STUDENTS CODE ********************************/
+
 	   if (command_counter > 0) {
 			if (command_counter > MAX_COMMANDS){
 				printf("Error: Maximum number of commands is %d \n", MAX_COMMANDS);
@@ -205,6 +206,30 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
+
+    //simple commmand
+    if (command_counter == 1) {
+        int pid, status;
+        pid = fork();
+        
+        switch (pid){
+        
+        case -1:  //error case
+        
+            perror("Error in fork");
+            return -1;
+            
+        case 0:  //child
+        
+            execvp(argvv[0][0],argvv[0]);
+            perror("Error in exec");
+            break;
+        
+        default:  //parent proces
+            
+            while(wait(&status)!=pid);
+        }
+    }
 	
 	return 0;
 }

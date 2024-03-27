@@ -3,7 +3,7 @@
 //  MSH main file
 // Write your msh source code here
 
-  //include "parser.h"
+//include "parser.h"
 #include <stddef.h>			/* NULL */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -248,12 +248,14 @@ int main(int argc, char* argv[])
                 }
             }
 
-            int pid;
             for (int i = 0; i < command_counter; i++) {
-                if ((pid = fork()) == -1) {
+
+                int pid = fork();
+                if (pid == -1) {
                     perror("fork");
                     exit(EXIT_FAILURE);
-                } else if (pid == 0) {  // child process
+                } 
+                else if (pid == 0) {  // child process
                     if (i > 0) {
                         dup2(pipes[i - 1][0], STDIN_FILENO);
                         close(pipes[i - 1][0]);
@@ -268,20 +270,25 @@ int main(int argc, char* argv[])
                     perror("execvp");
                     exit(EXIT_FAILURE);
                 }
-            }
 
+                
+            }
             for (int i = 0; i < command_counter - 1; i++) {
                 close(pipes[i][0]);
                 close(pipes[i][1]);
             }
-
-            for (int i = 0; i < command_counter; i++) {
-                wait(NULL);
+            if (in_background != 1) { // back to the parent waiting
+                for (int i = 0; i < command_counter; i++) {
+                    wait(NULL); // Wait for all child processes to finish
+                }
+            } else { // back to the parent without waiting
+                printf("Pid = [%d]\n", getpid()); // Print PID of each child process
             }
 
         }
 
-
+        }
+        return 0;
 	}
-	return 0;
-}
+	
+

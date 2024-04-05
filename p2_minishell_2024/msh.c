@@ -211,6 +211,30 @@ int main(int argc, char* argv[])
         if (command_counter == 1) {
             int pid, status;
             pid = fork();
+
+	    // redireccionamientos de 0,1,2 input,output,error
+		if (strcmp(filev[0], "0")!= 0){ // If there is an input file, close STDOUT input & open it
+			if ((close(0))<0){
+			perror("Error closing default descriptor 0");
+			}
+			if (fd = open(filev[0],O_RDONLY,0666)<0){
+			perror("Error opening file");}
+		}
+		if (strcmp(filev[1], "0")!= 0){ // If there is an output file, close STDOUT & open file
+			if ((close(1))<0){
+			perror("Error closing default descriptor 1");
+			}
+			if (fd = open(filev[1],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
+			perror("Error opening file");}
+		}			
+		if (strcmp(filev[2], "0")!= 0){ // If there is error file, close error and open file
+			if ((close(2))<0){
+			perror("Error closing default descriptor 2");
+			}
+			if (fd = open(filev[2],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
+			perror("Error opening file");}
+		}	
+
             
             switch (pid){
             

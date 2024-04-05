@@ -1,6 +1,6 @@
 //P2-SSOO-23/24
 
-//  MSH main file
+// MSH main file
 // Write your msh source code here
 
 //include "parser.h"
@@ -211,6 +211,31 @@ int main(int argc, char* argv[])
         if (command_counter == 1) {
             int pid, status;
             pid = fork();
+
+            // redireccionamientos de 0,1,2 input,output,error
+			if (strcmp(filev[0], "0")!= 0){ // If there is an input file, close STDOUT input & open it
+				if ((close(0))<0){
+				perror("Error closing default descriptor 0");
+				}
+				if (fd = open(filev[0],O_RDONLY,0666)<0){
+				perror("Error opening file");}
+			}
+			if (strcmp(filev[1], "0")!= 0){ // If there is an output file, close STDOUT & open file
+				if ((close(1))<0){
+				perror("Error closing default descriptor 1");
+				}
+				if (fd = open(filev[1],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
+				perror("Error opening file");}
+			}			
+			if (strcmp(filev[2], "0")!= 0){ // If there is error file, close error and open file
+				if ((close(2))<0){
+				perror("Error closing default descriptor 2");
+				}
+				if (fd = open(filev[2],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
+				perror("Error opening file");}
+			}	
+
+
             
             switch (pid){
             
@@ -218,6 +243,7 @@ int main(int argc, char* argv[])
             
                 perror("Error in fork");
                 return -1;
+
                 
             case 0:  //child
             
@@ -243,7 +269,7 @@ int main(int argc, char* argv[])
 
             for (int i = 0; i < command_counter - 1; i++) {
                 if (pipe(pipes[i]) == -1) {
-                    perror("pipe");
+                    perror("error in pipe");
                     exit(EXIT_FAILURE);
                 }
             }
@@ -252,7 +278,7 @@ int main(int argc, char* argv[])
 
                 int pid = fork();
                 if (pid == -1) {
-                    perror("fork");
+                    perror("error in fork");
                     exit(EXIT_FAILURE);
                 } 
                 else if (pid == 0) {  // child process
@@ -267,22 +293,26 @@ int main(int argc, char* argv[])
                         close(pipes[i][1]);
                     }
                     execvp(argvv[i][0], argvv[i]);
-                    perror("execvp");
+                    perror("error in execvp");
                     exit(EXIT_FAILURE);
                 }
 
                 
             }
+
             for (int i = 0; i < command_counter - 1; i++) {
                 close(pipes[i][0]);
                 close(pipes[i][1]);
             }
+
             if (in_background != 1) { // back to the parent waiting
                 for (int i = 0; i < command_counter; i++) {
                     wait(NULL); // Wait for all child processes to finish
                 }
-            } else { // back to the parent without waiting
-                printf("Pid = [%d]\n", getpid()); // Print PID of each child process
+            } 
+            
+            else { // back to the parent without waiting
+                printf("Pid = [%d]\n", getpid()); // Print PID of child process
             }
 
         }

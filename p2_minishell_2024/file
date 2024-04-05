@@ -1,0 +1,8 @@
+Makefile
+authors.txt
+checker_os_p2.sh
+file
+libparser.so
+msh
+msh.c
+msh.o

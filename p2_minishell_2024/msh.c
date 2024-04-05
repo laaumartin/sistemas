@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
   
         //simple commmand
         if (command_counter == 1) {
-            int pid, status;
+            int pid, status, fd=0;
             pid = fork();
 
             // redireccionamientos de 0,1,2 input,output,error
@@ -235,8 +235,6 @@ int main(int argc, char* argv[])
 				perror("Error opening file");}
 			}	
 
-
-            
             switch (pid){
             
             case -1:  //error case

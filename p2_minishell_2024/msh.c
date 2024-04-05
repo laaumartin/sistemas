@@ -130,7 +130,7 @@ void getCompleteCommand(char*** argvv, int num_command) {
 
 	int i = 0;
 	for ( i = 0; argvv[num_command][i] != NULL; i++)
-		argv_execvp[i] = argvv[num_command][i];
+		argv_execvp[i] = argvv[num_command][i]; //
 }
 
 
@@ -212,6 +212,7 @@ int main(int argc, char* argv[])
             int pid, status, fd=0;
             pid = fork();
 
+<<<<<<< HEAD
             // redireccionamientos de 0,1,2 input,output,error
 			if (strcmp(filev[0], "0")!= 0){ // If there is an input file, close STDOUT input & open it
 				if ((close(0))<0){
@@ -235,6 +236,32 @@ int main(int argc, char* argv[])
 				perror("Error opening file");}
 			}	
 
+=======
+	    // redireccionamientos de 0,1,2 input,output,error
+		if (strcmp(filev[0], "0")!= 0){ // If there is an input file, close STDOUT input & open it
+			if ((close(0))<0){
+			perror("Error closing default descriptor 0");
+			}
+			if (fd = open(filev[0],O_RDONLY,0666)<0){
+			perror("Error opening file");}
+		}
+		if (strcmp(filev[1], "0")!= 0){ // If there is an output file, close STDOUT & open file
+			if ((close(1))<0){
+			perror("Error closing default descriptor 1");
+			}
+			if (fd = open(filev[1],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
+			perror("Error opening file");}
+		}			
+		if (strcmp(filev[2], "0")!= 0){ // If there is error file, close error and open file
+			if ((close(2))<0){
+			perror("Error closing default descriptor 2");
+			}
+			if (fd = open(filev[2],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
+			perror("Error opening file");}
+		}	
+
+            
+>>>>>>> bf8fcb7c6c7d12a5524d7f438f51981b2216b2cf
             switch (pid){
             
             case -1:  //error case
@@ -276,7 +303,11 @@ int main(int argc, char* argv[])
 
                 int pid = fork();
                 if (pid == -1) {
+<<<<<<< HEAD
                     perror("error in fork");
+=======
+                    perror("fork");
+>>>>>>> bf8fcb7c6c7d12a5524d7f438f51981b2216b2cf
                     exit(EXIT_FAILURE);
                 } 
                 else if (pid == 0) {  // child process
@@ -294,19 +325,28 @@ int main(int argc, char* argv[])
                     perror("error in execvp");
                     exit(EXIT_FAILURE);
                 }
+<<<<<<< HEAD
 
                 
             }
+=======
+>>>>>>> bf8fcb7c6c7d12a5524d7f438f51981b2216b2cf
 
+                
+            }
             for (int i = 0; i < command_counter - 1; i++) {
                 close(pipes[i][0]);
                 close(pipes[i][1]);
             }
+<<<<<<< HEAD
 
+=======
+>>>>>>> bf8fcb7c6c7d12a5524d7f438f51981b2216b2cf
             if (in_background != 1) { // back to the parent waiting
                 for (int i = 0; i < command_counter; i++) {
                     wait(NULL); // Wait for all child processes to finish
                 }
+<<<<<<< HEAD
             } 
             
             else { // back to the parent without waiting
@@ -320,3 +360,15 @@ int main(int argc, char* argv[])
 	}
 	
 
+=======
+            } else { // back to the parent without waiting
+                printf("Pid = [%d]\n", getpid()); // Print PID of each child process
+            }
+
+	}
+
+	}
+return 0;
+}
+	
+>>>>>>> bf8fcb7c6c7d12a5524d7f438f51981b2216b2cf

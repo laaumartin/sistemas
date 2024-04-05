@@ -130,7 +130,7 @@ void getCompleteCommand(char*** argvv, int num_command) {
 
 	int i = 0;
 	for ( i = 0; argvv[num_command][i] != NULL; i++)
-		argv_execvp[i] = argvv[num_command][i];
+		argv_execvp[i] = argvv[num_command][i]; //
 }
 
 

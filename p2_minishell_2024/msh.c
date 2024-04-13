@@ -206,12 +206,15 @@ int main(int argc, char* argv[])
 				print_command(argvv, filev, in_background);
 			}
 		}
+         for (int i =0; i< command_counter; i++){ 
+            //here we store commands in array argvv
+		    getCompleteCommand(argvv,i); 
+		}
 
         //mycalc
         if(strcmp(argvv[0][0], "mycalc") == 0) {
 			
 		// function mycalc
-
 
 			if (argvv[0][1]!=NULL && argvv[0][2]!=NULL && argvv[0][3]!=NULL){
 
@@ -292,6 +295,30 @@ int main(int argc, char* argv[])
                     }
  			}
 
+        }else if(strcmp(argvv[0][0], "myhistory") == 0){
+            //function myhistory
+            if (argvv[0][1]==NULL){
+                //case: list last 20 commands
+                for (i=0; i<n_elem ; i++){
+                    struct command actCommand=history[i] ;
+                    printf("[%n] %c",i,print_command(actCommand.argvv,filev,in_background));
+                }
+            }else if (argvv[0][1]!=NULL && argvv[0][1]>=0 && argvv[0][1]<n_elem){
+                //case: execute specified command
+            }
+        }else{
+            //each time that we run a command is stored in 'history'
+            if (n_elem<20){
+                if(n_elem==0){
+                    head= //command
+                }
+                store_command();
+                tail=//command
+            }else{
+                free_command(); //remove command in head
+                store_command();
+                tail= //command
+            }
         }
 
   

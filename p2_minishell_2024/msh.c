@@ -294,36 +294,57 @@ int main(int argc, char* argv[])
                         perror ("Error while writing in standard error output");
                     }
  			}
+        }
 
-        }else if(strcmp(argvv[0][0], "myhistory") == 0){
-            //function myhistory
-            if (argvv[0][1]==NULL){
+        else if(strcmp(argvv[0][0], "myhistory") == 0){
+
+            if (argvv[0][1] == NULL){
                 //case: list last 20 commands
-                for (i=0; i<n_elem ; i++){
-                    struct command actCommand=history[i] ;
-                    printf("[%n] %c",i,print_command(actCommand.argvv,filev,in_background));
+                for (int i = 0; i < n_elem; i++){
+                    struct command actCommand = history[i];
+                    printf("[%d] ", i);
+                    print_command(actCommand.argvv, filev, in_background);
                 }
-            }else if (argvv[0][1]!=NULL && argvv[0][1]>=0 && argvv[0][1]<n_elem){
+            } else if (argvv[0][1] != NULL && atoi(argvv[0][1]) >= 0 && atoi(argvv[0][1]) < n_elem){
                 //case: execute specified command
-            }
-        }else{
-            //each time that we run a command is stored in 'history'
-            if (n_elem<20){
-                if(n_elem==0){
-                    head= //command
+                int index = atoi(argvv[0][1]);
+                struct command *cmd = &history[index];
+                // Ejecutar el comando almacenado en la estructura de comando
+                int pid = fork();
+                if (pid == -1) {
+                    perror("Error in fork");
+                    exit(EXIT_FAILURE);
+                } else if (pid == 0) { // proceso hijo
+                    execvp(cmd->argvv[0][0], cmd->argvv[0]);
+                    perror("Error in execvp");
+                    exit(EXIT_FAILURE);
+                } else { // proceso padre
+                    wait(NULL); // esperar a que el hijo termine
                 }
-                store_command();
-                tail=//command
-            }else{
-                free_command(); //remove command in head
-                store_command();
-                tail= //command
+            }
+        } 
+        
+        else {
+            //each time that we run a command is stored in 'history'
+            if (n_elem < 20){
+                if (n_elem == 0){
+                    head = tail = 0; //initialize head and tail
+                }
+                store_command(argvv, filev, in_background, &history[tail]);
+                tail = (tail + 1) % history_size;
+                if (n_elem < history_size){
+                    n_elem++;
+                }
+            } else {
+                free_command(&history[head]); //remove command in head
+                store_command(argvv, filev, in_background, &history[tail]);
+                head = (head + 1) % history_size;
+                tail = (tail + 1) % history_size;
             }
         }
 
-  
         //simple commmand
-        else if (command_counter == 1) {
+        if (command_counter == 1) {
             int pid, status, fd=0;
             pid = fork();
 
@@ -375,90 +396,125 @@ int main(int argc, char* argv[])
             }
         }
 
-        //multiple commands
-        else if (command_counter > 1){
-
-            int fdes=0;
+        
+        else if(command_counter>1) {// ******************************MULTIPLE COMMANDS ******************
+			int fdes=0;
                   	int fd[2];
                   	int pid, status;
 			
-      			if (strcmp(filev[0], "0")!= 0){ // If there is an input file, close STDOUT input & open it
-      				if ((close(0))<0){
-      				perror("Error closing default descriptor 0");
-      				}
-      				if (fdes = open(filev[0],O_RDONLY,0666)<0){
-      				perror("Error opening file");}
-      			}
-      			if (strcmp(filev[1], "0")!= 0){ // If there is an output file, close STDOUT & open file
-      				if ((close(1))<0){
-      				perror("Error closing default descriptor 1");
-      				}
-      				if (fdes = open(filev[1],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
-      				perror("Error opening file");}
-      			}					
-      			if (strcmp(filev[2], "0")!= 0){ // If error file, close error and open error file
-      				if ((close(2))<0){
-      				perror("Error closing default descriptor 2");
-      				}
-      				if (fdes = open(filev[2],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
-      				perror("Error opening file");}
-      			}	
+			
+			if (strcmp(filev[0], "0")!= 0){ // If there is an input file, close STDOUT input & open it
+				if ((close(0))<0){
+				perror("Error closing default descriptor 0");
+				}
+				if (fdes = open(filev[0],O_RDONLY,0666)<0){
+				perror("Error opening file");}
+			}
+			if (strcmp(filev[1], "0")!= 0){ // If there is an output file, close STDOUT & open file
+				if ((close(1))<0){
+				perror("Error closing default descriptor 1");
+				}
+				if (fdes = open(filev[1],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
+				perror("Error opening file");}
+			}					
+			if (strcmp(filev[2], "0")!= 0){ // If error file, close error and open error file
+				if ((close(2))<0){
+				perror("Error closing default descriptor 2");
+				}
+				if (fdes = open(filev[2],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
+				perror("Error opening file");}
+			}	
 
-            int pipes[command_counter - 1][2];  //create same number of pipes as many commands except of one
+			int newinput = dup(STDIN_FILENO);
 
-            for (int i = 0; i < command_counter - 1; i++) {
-                if (pipe(pipes[i]) == -1) {
-                    perror("error in pipe");
-                    exit(EXIT_FAILURE);
-                }
-            }
+ 			for (int i = 0; i < command_counter; i++) {
+                    //We create as many pipes as commands but one
+                    		if (i != command_counter - 1) {
+                     			if (pipe(fd) < 0) {
+                        		perror("Error en pipe\n");
+                        		exit(0);
+                      			}
+                   		}
+                   		
 
-            for (int i = 0; i < command_counter; i++) {
+                    		/* Create the process to connect a sequence of commands */
+                    		pid = fork();
+                    		if (pid==0){ // child 
+                    		
+					//the standard input is now the one given by previous child
+					if (dup2(newinput,STDIN_FILENO) < 0){;// we position newinput in place of the standard input
+						perror("Error duplicating and placing the descriptor");	
+					}
 
-                int pid = fork();
-                if (pid == -1) {
-                    perror("error in fork");
-                    exit(EXIT_FAILURE);
-                } 
-                else if (pid == 0) {  // child process
-                    if (i > 0) {
-                        dup2(pipes[i - 1][0], STDIN_FILENO);
-                        close(pipes[i - 1][0]);
-                        close(pipes[i - 1][1]);
-                    }
-                    if (i < command_counter - 1) {
-                        dup2(pipes[i][1], STDOUT_FILENO);
-                        close(pipes[i][0]);
-                        close(pipes[i][1]);
-                    }
-                    execvp(argvv[i][0], argvv[i]);
-                    perror("error in execvp");
-                    exit(EXIT_FAILURE);
-                }
+					if (close(newinput)<0){
+						perror("Error closing the descriptor");
+					}
+					
+					if (i!= command_counter-1){
+					//enviar input 
+						if (dup2(fd[1],STDOUT_FILENO)<0){ //we position fd[1] in place of the standard output
+						perror("Error duplicating and placing the descriptor");
+						}
+						if (close(fd[1])<0){
+							perror("Error closing the descriptor");
+						}
+						if (close(fd[0])<0){
+							perror("Error closing the descriptor");
+						}
+					}
 
-                
-            }
+					if(execvp(argvv[i][0],argvv[i]) <0) {
+						perror("Error executing the command");
+						exit(0);
+					} // we use execvp as we expect input arguments and the path for the program to
+ 					break;
 
-            for (int i = 0; i < command_counter - 1; i++) {
-                close(pipes[i][0]);
-                close(pipes[i][1]);
-            }
+				} else if(pid<0){
+					perror("An error occured during the fork");
+				} else{//father
+					
+					if (close(newinput)<0){
+						perror("Error closing the descriptor");
+					}
 
-            if (in_background != 1) { // back to the parent waiting
-                for (int i = 0; i < command_counter; i++) {
-                    wait(NULL); // Wait for all child processes to finish
-                }
-            } 
-            
-            else { // back to the parent without waiting
-                printf("Pid = [%d]\n", getpid()); // Print PID of child process
-            }
+					if (i!= command_counter-1){
+						//the father gives value to the standard input so next child can use it if it is not the last child
 
-        }
+						if ((newinput = dup(fd[0])) < 0){;// if it is not the last process the father gives a value so that the child can use it in next command and this way we connect the sequence of commands
+							perror("Error duplicating the descriptor");	
+						}
+						
+						if (dup(fd[0])<0){
+							perror("Error duplicating the descriptor");	
+						}
+						if (close(fd[1])<0){
+							perror("Error closing the descriptor");
+						}
+					}
+					
+                  		
+				}// close switch
+			} // close for
+			 	if (fdes!=0){// If a file has been opened, then close the file			
+					if((close(fdes)) < 0){
+																					 						perror("Error closing the file opened");}
+			
+				}
 
-    
-        }
+				if(in_background !=1){ // back to the parent waiting
+					while(pid != wait (&status));
+					
+				}
+				else{ // back to the parent without waiting
+				printf("Pid = [%d]\n",getpid());} 
+                    			
+                 		 
+                  
+		  	}
+        
+    }
 
-		
 }
+
+       
 

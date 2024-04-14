@@ -133,7 +133,6 @@ void getCompleteCommand(char*** argvv, int num_command) {
 		argv_execvp[i] = argvv[num_command][i];
 }
 
-
 /**
  * Main sheell  Loop  
  */
@@ -212,89 +211,76 @@ int main(int argc, char* argv[])
 		}
 
         //mycalc
-        if(strcmp(argvv[0][0], "mycalc") == 0) {
+		if(strcmp(argvv[0][0], "mycalc") == 0) {
 			
-		// function mycalc
+			if (argvv[0][1] != NULL && argvv[0][2] != NULL && argvv[0][3] != NULL) {
+				if (strcmp(argvv[0][2], "add") == 0) {
+					
+					int add1 = atoi(argvv[0][1]);
+					int add2 = atoi(argvv[0][3]);
+					int result = add1 + add2;
+					int accsum = 0;
+					accsum += result;
+					char array[20];
+					sprintf(array, "%d", accsum);
+					const char *value = array;
 
-			if (argvv[0][1]!=NULL && argvv[0][2]!=NULL && argvv[0][3]!=NULL){
+					if (setenv("Acc", value, 1) < 0) {
+						perror("Error with the value of the environment variable\n");
+					}
 
-                int acc = 0;
+					char buffer[1024];
+					snprintf(buffer, 1024, "[OK] %d + %d = %d; Acc %s \n", add1, add2, result, getenv("Acc"));
+					if((write(2, buffer, strlen(buffer))) < 0) {
+						perror("Error while writing in standard error output");
+					}
+				} else if (strcmp(argvv[0][2], "mul") == 0) {
+					
+					int num1 = atoi(argvv[0][1]);
+					int num2 = atoi(argvv[0][3]);
+					int result = num1 * num2;
 
-				if (strcmp(argvv[0][2],"add")== 0){
-				
-				int add1 = atoi(argvv[0][1]);
-				int add2 = atoi (argvv[0][3]);
-				int result = add1 + add2;
-                  		
-				acc +=  result;
-                      		char array[20];
-                      		sprintf(array, "%d", acc);
-                      		const char *value = array;
-
-				if (setenv("Acc", value, 1) < 0) {
-						perror("Error with the value of the environment variable\n");}
-
-				char buffer[1024];
-				snprintf(buffer,1024,"[OK] %d + %d = %d; Acc %s \n",add1,add2,result,getenv("Acc"));
-				if((write(2, buffer,strlen(buffer))) < 0){
-					perror ("Error while writing in standard error output");}
-		
-
-				}
-				else if (strcmp(argvv[0][2],"mul")== 0){
-				
-                    int num1 = atoi(argvv[0][1]);
-                    int num2 = atoi (argvv[0][3]);
-                    int result = num1 * num2;
-        
-
-                    char buffer[1024];
-                    snprintf(buffer,1024,"[OK] %d * %d = %d \n",num1,num2,result);
-				if((write(2, buffer,strlen(buffer))) < 0){
-
-					perror ("Error while writing in standard error output");}
+					char buffer[1024];
+					snprintf(buffer, 1024, "[OK] %d * %d = %d \n", num1, num2, result);
+					if((write(2, buffer, strlen(buffer))) < 0) {
+						perror("Error while writing in standard error output");
+					}
+				} else if (strcmp(argvv[0][2], "div") == 0) {
 			
+					int num1 = atoi(argvv[0][1]);
+					int num2 = atoi(argvv[0][3]);
+					if (num2 != 0) {
+						int result = num1 / num2;
+						int remainder = num1 % num2;
 
+						char buffer[1024];
+						snprintf(buffer, 1024, "[OK] %d / %d = %d; Remainder %d \n", num1, num2, result, remainder);
+						if((write(2, buffer, strlen(buffer))) < 0) {
+							perror("Error while writing in standard error output");
+						}
+					} else {
+						// error if division by 0
+						if((write(2, "Error: Division by zero\n", strlen("Error: Division by zero\n"))) < 0) {
+							perror("Error while writing in standard error output");
+						}
+					}
+				} else {
+					// sintaxis control if there are 3 arguments but no add, mul or div
+					int length = strlen("[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n");
+					if((write(2, "[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n", length)) < 0) {
+						perror("Error while writing in standard error output");
+					}
 				}
-
-                else if (strcmp(argvv[0][2],"div")== 0){
-                    
-                    int num1 = atoi(argvv[0][1]);
-                    int num2 = atoi (argvv[0][3]);
-                    int result = abs(num1/num2);
-                    int remainder = num1 % num2;
-        
-
-                    char buffer[1024];
-                    snprintf(buffer,1024,"[OK] %d / %d = %d;Remainder %d \n",num1,num2,result,remainder);
-				if((write(2, buffer,strlen(buffer))) < 0){
-					perror ("Error while writing in standard error output");
-                }
-			
-
+			} else {
+				// sintaxis control if there are no 3 arguments
+				int length = strlen("[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n");
+				if((write(2, "[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n", length)) < 0) {
+					perror("Error while writing in standard error output");
 				}
-            
-                else{ 
-				
-                    // control of syntaxis in case 3 arguments are included BUT do not include add or mod
-                    int length = strlen("[ERROR] The structure of the command is mycalc <operand_1> <add/mod> <operand_2>\n");
-                    if((write(2,"[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n",length)) < 0){
-                        perror ("Error while writing in standard error output");
-                    
-                    }
- 	 				
-				}
-			
-
 			}
-            else{ 
-                // control of syntaxis in case not 3 arguments are included after mycalc
-                int length = strlen("[ERROR] The structure of the command is mycalc <operand_1> <add/mod> <operand_2>\n");
-                    if((write(2,"[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n",length)) < 0){
-                        perror ("Error while writing in standard error output");
-                    }
- 			}
-        }
+		}
+
+
 
         else if(strcmp(argvv[0][0], "myhistory") == 0) {
 			if (argvv[0][1] == NULL) {
@@ -341,7 +327,6 @@ int main(int argc, char* argv[])
 				tail = (tail + 1) % history_size;
 			}
 		}
-
 
         //simple commmand
         if (command_counter == 1) {

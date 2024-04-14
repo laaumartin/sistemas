@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
 			}
 			else {
 				// Print command
-				print_command(argvv, filev, in_background);
+				//print_command(argvv, filev, in_background);
 			}
 		}
          for (int i =0; i< command_counter; i++){ 

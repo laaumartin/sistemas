@@ -296,52 +296,52 @@ int main(int argc, char* argv[])
  			}
         }
 
-        else if(strcmp(argvv[0][0], "myhistory") == 0){
+        else if(strcmp(argvv[0][0], "myhistory") == 0) {
+			if (argvv[0][1] == NULL) {
+				// Caso: listar los últimos 20 comandos
+				for (int i = 0; i < n_elem; i++) {
+					printf("[%d] ", i);
+					print_command(history[i].argvv, history[i].filev, history[i].in_background);
+				}
+			} else if (argvv[0][1] != NULL && atoi(argvv[0][1]) >= 0 && atoi(argvv[0][1]) < n_elem) {
+				// Caso: ejecutar el comando especificado
+				int index = atoi(argvv[0][1]);
+				struct command *cmd = &history[index];
 
-            if (argvv[0][1] == NULL){
-                //case: list last 20 commands
-                for (int i = 0; i < n_elem; i++){
-                    struct command actCommand = history[i];
-                    printf("[%d] ", i);
-                    print_command(actCommand.argvv, filev, in_background);
-                }
-            } else if (argvv[0][1] != NULL && atoi(argvv[0][1]) >= 0 && atoi(argvv[0][1]) < n_elem){
-                //case: execute specified command
-                int index = atoi(argvv[0][1]);
-                struct command *cmd = &history[index];
-                // Ejecutar el comando almacenado en la estructura de comando
-                int pid = fork();
-                if (pid == -1) {
-                    perror("Error in fork");
-                    exit(EXIT_FAILURE);
-                } else if (pid == 0) { // proceso hijo
-                    execvp(cmd->argvv[0][0], cmd->argvv[0]);
-                    perror("Error in execvp");
-                    exit(EXIT_FAILURE);
-                } else { // proceso padre
-                    wait(NULL); // esperar a que el hijo termine
-                }
-            }
-        } 
-        
-        else {
-            //each time that we run a command is stored in 'history'
-            if (n_elem < 20){
-                if (n_elem == 0){
-                    head = tail = 0; //initialize head and tail
-                }
-                store_command(argvv, filev, in_background, &history[tail]);
-                tail = (tail + 1) % history_size;
-                if (n_elem < history_size){
-                    n_elem++;
-                }
-            } else {
-                free_command(&history[head]); //remove command in head
-                store_command(argvv, filev, in_background, &history[tail]);
-                head = (head + 1) % history_size;
-                tail = (tail + 1) % history_size;
-            }
-        }
+				int pid = fork();
+				if (pid == -1) {
+					perror("Error in fork");
+					exit(EXIT_FAILURE);
+				} else if (pid == 0) { // Proceso hijo
+					execvp(cmd->argvv[0][0], cmd->argvv[0]);
+					perror("Error in execvp");
+					exit(EXIT_FAILURE);
+				} else { // Proceso padre
+					wait(NULL); // Esperar a que el hijo termine
+				}
+			} else {
+				// Error: comando fuera de rango
+				fprintf(stderr, "ERROR: Command not found\n");
+			}
+		} else {
+			// Cada vez que se ejecuta un comando, se almacena en 'history'
+			if (n_elem < 20) {
+				if (n_elem == 0) {
+					head = tail = 0; // Inicializar head y tail
+				}
+				store_command(argvv, filev, in_background, &history[tail]);
+				tail = (tail + 1) % history_size;
+				if (n_elem < history_size) {
+					n_elem++;
+				}
+			} else {
+				free_command(&history[head]); // Eliminar comando en head
+				store_command(argvv, filev, in_background, &history[tail]);
+				head = (head + 1) % history_size;
+				tail = (tail + 1) % history_size;
+			}
+		}
+
 
         //simple commmand
         if (command_counter == 1) {
@@ -396,8 +396,8 @@ int main(int argc, char* argv[])
             }
         }
 
-        
-        else if(command_counter>1) {// ******************************MULTIPLE COMMANDS ******************
+        //multiple commands
+        else if(command_counter>1) {
 			int fdes=0;
                   	int fd[2];
                   	int pid, status;

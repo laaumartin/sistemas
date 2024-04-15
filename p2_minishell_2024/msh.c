@@ -295,32 +295,20 @@ int main(int argc, char* argv[])
 					fprintf(stderr,"\n");
             	}
             
-			} else{
-				int index = atoi(argvv[0][1]);
-				if (index>=0 && index<n_elem){
-				    // Ejecutar el comando especificado
-				    fprintf(stderr, "Running command %d\n", index);
-				    struct command *cmd = &history[index];
-				    // Configurar los argumentos para el proceso hijo
-				    char *args[MAX_ARGS]; // Aquí asumo que MAX_ARGS es el máximo número de argumentos esperados
-				    int argc = 0;
-				    for (int i = 0; i < cmd->num_commands; i++) {
-					for (int j = 0; j < cmd->args[i]; j++) {
-					    args[argc++] = cmd->argvv[i][j];
-					}
-				    }
-				    args[argc] = NULL; // Añadir NULL al final de la lista de argumentos
-				    // Ejecutar el comando
-				    int pid = fork();
-				    if (pid == -1) {
-					perror("Error in fork");
-					exit(EXIT_FAILURE);
-				    } else if (pid == 0) { // Proceso hijo
-					execvp(args[0], args);
-					perror("Error in execvp");
-					exit(EXIT_FAILURE);
-				    } else { // Proceso padre
-					wait(NULL); // Esperar a que el hijo termine
+			} else if (argvv[0][1] != NULL && atoi(argvv[0][1]) >= 0 && atoi(argvv[0][1]) < n_elem) {
+				    int index = atoi(argvv[0][1]);
+				    if (index >= 0 && index < n_elem) {
+				        fprintf(stderr, "Running command %d\n", index);
+				        struct command *cmd = &history[index];
+				        command_counter = history[index].num_commands;
+				        // Copiar los argumentos del comando del historial a argvv actual
+				        for (int i = 0; i < num_commands; i++) {
+				            for (int j = 0; j < history[index].args[i]; j++) {
+				                argvv[i][j] = history[index].argvv[i][j];
+				            }
+				            argvv[i][history[index].args[i]] = NULL;
+				        }
+				        run_history = 1;
 				    }
 				}
 				else {

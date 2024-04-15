@@ -132,7 +132,7 @@ void getCompleteCommand(char*** argvv, int num_command) {
 	for ( i = 0; argvv[num_command][i] != NULL; i++)
 		argv_execvp[i] = argvv[num_command][i];
 }
-
+int accsum = 0;
 /**
  * Main sheell  Loop  
  */
@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
 					int add1 = atoi(argvv[0][1]);
 					int add2 = atoi(argvv[0][3]);
 					int result = add1 + add2;
-					int accsum = 0;
+					
 					accsum += result;
 					char array[20];
 					sprintf(array, "%d", accsum);
@@ -229,22 +229,16 @@ int main(int argc, char* argv[])
 						perror("Error with the value of the environment variable\n");
 					}
 
-					char buffer[1024];
-					snprintf(buffer, 1024, "[OK] %d + %d = %d; Acc %s \n", add1, add2, result, getenv("Acc"));
-					if((write(2, buffer, strlen(buffer))) < 0) {
-						perror("Error while writing in standard error output");
-					}
+					fprintf(stderr, "[OK] %d + %d = %d; Acc %s \n", add1, add2, result, getenv("Acc"));
+					
 				} else if (strcmp(argvv[0][2], "mul") == 0) {
 					
 					int num1 = atoi(argvv[0][1]);
 					int num2 = atoi(argvv[0][3]);
 					int result = num1 * num2;
 
-					char buffer[1024];
-					snprintf(buffer, 1024, "[OK] %d * %d = %d \n", num1, num2, result);
-					if((write(2, buffer, strlen(buffer))) < 0) {
-						perror("Error while writing in standard error output");
-					}
+					fprintf(stderr, "[OK] %d * %d = %d \n", num1, num2, result);
+					
 				} else if (strcmp(argvv[0][2], "div") == 0) {
 			
 					int num1 = atoi(argvv[0][1]);
@@ -253,42 +247,31 @@ int main(int argc, char* argv[])
 						int result = num1 / num2;
 						int remainder = num1 % num2;
 
-						char buffer[1024];
-						snprintf(buffer, 1024, "[OK] %d / %d = %d; Remainder %d \n", num1, num2, result, remainder);
-						if((write(2, buffer, strlen(buffer))) < 0) {
-							perror("Error while writing in standard error output");
-						}
+						fprintf(stderr, "[OK] %d / %d = %d; Remainder %d \n", num1, num2, result, remainder);
+					
 					} else {
 						// error if division by 0
-						if((write(2, "Error: Division by zero\n", strlen("Error: Division by zero\n"))) < 0) {
-							perror("Error while writing in standard error output");
-						}
+						perror("ERROR. Division by 0");
 					}
 				} else {
 					// sintaxis control if there are 3 arguments but no add, mul or div
-					int length = strlen("[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n");
-					if((write(2, "[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n", length)) < 0) {
-						perror("Error while writing in standard error output");
-					}
+					printf("[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n");
+			
 				}
 			} else {
 				// sintaxis control if there are no 3 arguments
-				int length = strlen("[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n");
-				if((write(2, "[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n", length)) < 0) {
-					perror("Error while writing in standard error output");
-				}
+				printf("[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n");
 			}
 		}
 
-
-
-        else if(strcmp(argvv[0][0], "myhistory") == 0) {
+		else if(strcmp(argvv[0][0], "myhistory") == 0) {
 			if (argvv[0][1] == NULL) {
 				// Caso: listar los últimos 20 comandos
 				for (int i = 0; i < n_elem; i++) {
 					printf("[%d] ", i);
-					print_command(history[i].argvv, history[i].filev, history[i].in_background);
-				}
+                	print_command(history[i].argvv, history[i].filev, history[i].in_background);
+            	}
+            
 			} else if (argvv[0][1] != NULL && atoi(argvv[0][1]) >= 0 && atoi(argvv[0][1]) < n_elem) {
 				// Caso: ejecutar el comando especificado
 				int index = atoi(argvv[0][1]);
@@ -310,7 +293,6 @@ int main(int argc, char* argv[])
 				fprintf(stderr, "ERROR: Command not found\n");
 			}
 		} 
-		
 		else {
 			// Cada vez que se ejecuta un comando, se almacena en 'history'
 			if (n_elem < 20) {
@@ -330,6 +312,7 @@ int main(int argc, char* argv[])
 				tail = (tail + 1) % history_size;
 			}
 
+	
 			//simple commmand
 			if (command_counter == 1) {
 				int pid, status, fd=0;

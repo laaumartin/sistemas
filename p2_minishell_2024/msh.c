@@ -295,25 +295,21 @@ int main(int argc, char* argv[])
 					fprintf(stderr,"\n");
             	}
             
-			} else if (argvv[0][1] != NULL && atoi(argvv[0][1]) >= 0 && atoi(argvv[0][1]) < n_elem) {
-				// Caso: ejecutar el comando especificado
+			} else{
 				int index = atoi(argvv[0][1]);
-				struct command *cmd = &history[index];
-
-				int pid = fork();
-				if (pid == -1) {
-					perror("Error in fork");
-					exit(EXIT_FAILURE);
-				} else if (pid == 0) { // Proceso hijo
-					execvp(cmd->argvv[0][0], cmd->argvv[0]);
-					perror("Error in execvp");
-					exit(EXIT_FAILURE);
-				} else { // Proceso padre
-					wait(NULL); // Esperar a que el hijo termine
+				if (index>=0 && index<n_elem){
+					// Caso: ejecutar el comando especificado
+					fprintf(stderr,"Running command %d\n",atoi(argvv[0][1]));
+					int index = atoi(argvv[0][1]);
+					struct command *cmd = &history[index];
+					command_counter=history[index].num_commands;
+					argvv= history[index].argvv;
+					run_history=1;
 				}
-			} else {
+				else {
 				// Error: comando fuera de rango
-				fprintf(stderr, "ERROR: Command not found\n");
+				printf("ERROR: Command not found\n");
+				}
 			}
 		} 
 		else {

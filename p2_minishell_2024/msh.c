@@ -268,8 +268,31 @@ int main(int argc, char* argv[])
 			if (argvv[0][1] == NULL) {
 				// Caso: listar los últimos 20 comandos
 				for (int i = 0; i < n_elem; i++) {
-					printf("[%d] ", i);
-                	print_command(history[i].argvv, history[i].filev, history[i].in_background);
+					fprintf(stderr,"%d ", i);
+                	for (int j=0; j<history[i].num_commands; j++){
+						for (int k=0; k<history[i].args[j]; k++){
+							fprintf(stderr,"%s", history[i].argvv[j][k]);
+							if (k!=history[i].args[j] -1){
+								fprintf(stderr," ");
+							}
+						}
+						if (j!= history[i].num_commands -1 ){
+							fprintf(stderr," | ");
+						}
+					}
+					if(strcmp(history[i].filev[0],"0") !=0){
+						fprintf(stderr, " < %s",history[i].filev[0]);
+					}
+					if(strcmp(history[i].filev[1],"0") !=0){
+						fprintf(stderr, " > %s",history[i].filev[1]);
+					}
+					if(strcmp(history[i].filev[2],"0") !=0){
+						fprintf(stderr, " ! > %s",history[i].filev[2]);
+					}
+					if (history[i].in_background){
+						fprintf(stderr," &");
+					}
+					fprintf(stderr,"\n");
             	}
             
 			} else if (argvv[0][1] != NULL && atoi(argvv[0][1]) >= 0 && atoi(argvv[0][1]) < n_elem) {

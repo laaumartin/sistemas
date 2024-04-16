@@ -275,64 +275,64 @@ int main(int argc, char* argv[])
 		else if(strcmp(argvv[0][0], "myhistory") == 0) { //myhistory function
 			if (argvv[0][1] == NULL) {
 				// Listing the last 20 commands 
-				for (int i = 0; i < n_elem; i++) {
-					fprintf(stderr,"%d ", i);
-                	for (int j=0; j<history[i].num_commands; j++){
-						for (int k=0; k<history[i].args[j]; k++){
-							fprintf(stderr,"%s", history[i].argvv[j][k]);
+				for (int i = 0; i < n_elem; i++) { //loop for iterating among the commands 
+					fprintf(stderr,"%d ", i); // prints the command
+                	for (int j=0; j<history[i].num_commands; j++){ //loop for iterating among each command of the current history entry
+						for (int k=0; k<history[i].args[j]; k++){ // loop for iterating through each argument of the current command
+							fprintf(stderr,"%s", history[i].argvv[j][k]); //prints the argument of the current command
 							if (k!=history[i].args[j] -1){
 								fprintf(stderr," ");
 							}
 						}
 						if (j!= history[i].num_commands -1 ){
-							fprintf(stderr," | ");
+							fprintf(stderr," | "); // adding a pipe symbol between each command except the last one
 						}
 					}
-					if(strcmp(history[i].filev[0],"0") !=0){
-						fprintf(stderr, " < %s",history[i].filev[0]);
+					if(strcmp(history[i].filev[0],"0") !=0){ //checking if there is an input redirection
+						fprintf(stderr, " < %s",history[i].filev[0]); // prints the input redirection
 					}
-					if(strcmp(history[i].filev[1],"0") !=0){
-						fprintf(stderr, " > %s",history[i].filev[1]);
+					if(strcmp(history[i].filev[1],"0") !=0){ // checks if there is an ouput redirection
+						fprintf(stderr, " > %s",history[i].filev[1]); //prints the output redirection
 					}
-					if(strcmp(history[i].filev[2],"0") !=0){
-						fprintf(stderr, " ! > %s",history[i].filev[2]);
+					if(strcmp(history[i].filev[2],"0") !=0){ // checks if there is an error redirection
+						fprintf(stderr, " ! > %s",history[i].filev[2]); //prints the error redirection 
 					}
-					if (history[i].in_background){
+					if (history[i].in_background){ // checks if the command has been run on background
 						fprintf(stderr," &");
 					}
 					fprintf(stderr,"\n");
             	}
-			} else if (argvv[0][1] != NULL && atoi(argvv[0][1]) >= 0 && atoi(argvv[0][1]) < n_elem) {
-				int index = atoi(argvv[0][1]);
-				if (index >= 0 && index < n_elem) {
-					fprintf(stderr, "Running command %d\n", index);
-					cmd = &history[index];
+			} else if (argvv[0][1] != NULL && atoi(argvv[0][1]) >= 0 && atoi(argvv[0][1]) < n_elem) {// checks if the index is inside the valid range and if there exist a 2nd arg
+				int index = atoi(argvv[0][1]);// converts 2nd argument from string into int
+				if (index >= 0 && index < n_elem) { // checks if the index is out of range
+					fprintf(stderr, "Running command %d\n", index); 
+					cmd = &history[index]; // set the command to be executed .
 					run_history = 1;
 				}
 			} 
 			else {
-				// Error: comando fuera de rango
+				// Command out of range
 				printf("ERROR: Command not found\n");
 
 			}
 		}
 		else {
-			// Cada vez que se ejecuta un comando, se almacena en 'history'
+			// Storing each executed command in the history
 			if (n_elem < 20 && count_command) {
 				if (n_elem == 0) {
-					head = tail = 0; // Inicializar head y tail
+					head = tail = 0; // Initialize head and tail
 				}
-				store_command(argvv, filev, in_background, &history[tail]);
-				tail = (tail + 1) % history_size;
+				store_command(argvv, filev, in_background, &history[tail]); // uses store command function to store the current command
+				tail = (tail + 1) % history_size;// updates the tail after storing a new command 
 				if (n_elem < history_size) {
-					n_elem++;
+					n_elem++; // incrementig the size of the history
 				}
 			}
-			else if (n_elem >= 20) {
-				free_command(&history[head]); // Eliminar comando en head
-				store_command(argvv, filev, in_background, &history[tail]);
-				head = (head + 1) % history_size;
-				tail = (tail + 1) % history_size;
+			else if (n_elem >= 20) { // there are already 20 elements
+				free_command(&history[head]); // eliminating the command that is in the head
+				store_command(argvv, filev, in_background, &history[tail]); // stores the new command 
+				head = (head + 1) % history_size; // update the head after having eliminating the previous one
+				tail = (tail + 1) % history_size; // updates the tail 
 			}
 
 

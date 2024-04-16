@@ -364,7 +364,7 @@ int main(int argc, char* argv[])
 						perror("Error opening file");}
 					}	
 
-				switch (pid){ 
+				switch (pid){ //choosing the process depending on the pid 
 				
 				case -1:  //error case
 				
@@ -374,8 +374,8 @@ int main(int argc, char* argv[])
 					
 				case 0:  //child
 				
-					execvp(argvv[0][0],argvv[0]);
-					perror("Error in exec");
+					execvp(argvv[0][0],argvv[0]); // a new program is executed 
+					perror("Error in exec"); // in case of failure
 					break;
 				
 				default:  //parent proces
@@ -384,7 +384,7 @@ int main(int argc, char* argv[])
 						while(pid !=wait (&status) );
 						
 					} else{     // back to the parent without waiting
-						printf("Pid = [%d]\n",getpid());
+						printf("Pid = [%d]\n",getpid()); // prints the id of the child
 					} 
 				}
 			}

@@ -221,60 +221,60 @@ int main(int argc, char* argv[])
         //mycalc
 		if(strcmp(argvv[0][0], "mycalc") == 0) {
 			
-			if (argvv[0][1] != NULL && argvv[0][2] != NULL && argvv[0][3] != NULL) {
-				if (strcmp(argvv[0][2], "add") == 0) {
+			if (argvv[0][1] != NULL && argvv[0][2] != NULL && argvv[0][3] != NULL) { //checks if the tree arguments exist.
+				if (strcmp(argvv[0][2], "add") == 0) { //addition case
 					
-					int add1 = atoi(argvv[0][1]);
-					int add2 = atoi(argvv[0][3]);
-					int result = add1 + add2;
+					int add1 = atoi(argvv[0][1]); // transforms the 1st argument from string to int
+					int add2 = atoi(argvv[0][3]); // transforms the 3rd argument from string to int
+					int result = add1 + add2; // executing the addition
 					
-					accsum += result;
+					accsum += result; // adds the result to the accumulator variable accsum
 					char array[20];
-					sprintf(array, "%d", accsum);
-					const char *value = array;
+					sprintf(array, "%d", accsum); // the accsum int is transformed into string and stored in the array
+					const char *value = array; // the string of the sum is assigned to the variable value
 
-					if (setenv("Acc", value, 1) < 0) {
-						perror("Error with the value of the environment variable\n");
+					if (setenv("Acc", value, 1) < 0) { // the enviroment variable Acc is set to the calculated value
+						perror("There has been an error with the enviroment variable Acc\n"); // printed message in case of error
 					}
 
-					fprintf(stderr, "[OK] %d + %d = %d; Acc %s \n", add1, add2, result, getenv("Acc"));
+					fprintf(stderr, "[OK] %d + %d = %d; Acc %s \n", add1, add2, result, getenv("Acc")); // prints the result of the sum and the value of Acc
 					
-				} else if (strcmp(argvv[0][2], "mul") == 0) {
+				} else if (strcmp(argvv[0][2], "mul") == 0) { // multiplication case
 					
-					int num1 = atoi(argvv[0][1]);
-					int num2 = atoi(argvv[0][3]);
-					int result = num1 * num2;
+					int num1 = atoi(argvv[0][1]); // transforms the 1st argument from string to int
+					int num2 = atoi(argvv[0][3]);// transforms the 3rd argument from string to int
+					int result = num1 * num2; //executes the multiplication
 
-					fprintf(stderr, "[OK] %d * %d = %d \n", num1, num2, result);
+					fprintf(stderr, "[OK] %d * %d = %d \n", num1, num2, result); //prints the result with the standard error output
 					
 				} else if (strcmp(argvv[0][2], "div") == 0) {
 			
-					int num1 = atoi(argvv[0][1]);
-					int num2 = atoi(argvv[0][3]);
-					if (num2 != 0) {
-						int result = num1 / num2;
-						int remainder = num1 % num2;
+					int num1 = atoi(argvv[0][1]);// transforms the 1st argument from string to int
+					int num2 = atoi(argvv[0][3]);// transforms the 3rd argument from string to int
+					if (num2 != 0) { // in case num2 (denominator) is not zero . 
+						int result = num1 / num2; // executes the division
+						int remainder = num1 % num2; // obtains the reminder of the division
 
-						fprintf(stderr, "[OK] %d / %d = %d; Remainder %d \n", num1, num2, result, remainder);
+						fprintf(stderr, "[OK] %d / %d = %d; Remainder %d \n", num1, num2, result, remainder); // prints the result of the division
 					
 					} else {
-						// error if division by 0
+						// error if the denominator is 0 
 						perror("ERROR. Division by 0");
 					}
 				} else {
-					// sintaxis control if there are 3 arguments but no add, mul or div
+					// Error in case there are three arguments but none of them is add , div , mult
 					printf("[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n");
 			
 				}
 			} else {
-				// sintaxis control if there are no 3 arguments
+				//Error in case there are not three arguments
 				printf("[ERROR] The structure of the command is mycalc <operand_1> <add/mul/div> <operand_2>\n");
 			}
 		}
 
-		else if(strcmp(argvv[0][0], "myhistory") == 0) {
+		else if(strcmp(argvv[0][0], "myhistory") == 0) { //myhistory function
 			if (argvv[0][1] == NULL) {
-				// Caso: listar los últimos 20 comandos
+				// Listing the last 20 commands 
 				for (int i = 0; i < n_elem; i++) {
 					fprintf(stderr,"%d ", i);
                 	for (int j=0; j<history[i].num_commands; j++){

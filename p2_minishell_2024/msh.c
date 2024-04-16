@@ -339,32 +339,32 @@ int main(int argc, char* argv[])
 			//simple commmand
 			if (command_counter == 1) {
 				int pid, status, fd=0;
-				pid = fork();
+				pid = fork(); // creating a child process
 
-				// redireccionamientos de 0,1,2 input,output,error
+				// Redirects 0(input) ,1 (output) ,2 (error)
 					if (strcmp(filev[0], "0")!= 0){ // If there is an input file, close STDOUT input & open it
 						if ((close(0))<0){
-						perror("Error closing default descriptor 0");
+						perror("Error closing default descriptor 0"); // prints an error if closing descriptor fails
 						}
-						if (fd = open(filev[0],O_RDONLY,0666)<0){
-						perror("Error opening file");}
+						if (fd = open(filev[0],O_RDONLY,0666)<0){ // open the input file for reading
+						perror("Error opening file");} // in case there is an error 
 					}
 					if (strcmp(filev[1], "0")!= 0){ // If there is an output file, close STDOUT & open file
-						if ((close(1))<0){
+						if ((close(1))<0){ // prints an error if closing descriptor fails
 						perror("Error closing default descriptor 1");
 						}
-						if (fd = open(filev[1],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
-						perror("Error opening file");}
+						if (fd = open(filev[1],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){ // open the ouput fie for writing
+						perror("Error opening file");} // message in case of error
 					}			
 					if (strcmp(filev[2], "0")!= 0){ // If there is error file, close error and open file
 						if ((close(2))<0){
 						perror("Error closing default descriptor 2");
 						}
-						if (fd = open(filev[2],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){
+						if (fd = open(filev[2],O_WRONLY|O_CREAT|O_TRUNC,0666)<0){ // opens the error file for writing
 						perror("Error opening file");}
 					}	
 
-				switch (pid){
+				switch (pid){ 
 				
 				case -1:  //error case
 				

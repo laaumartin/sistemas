@@ -163,9 +163,12 @@ int main(int argc, char* argv[])
 
 	history = (struct command*) malloc(history_size *sizeof(struct command));
 	int run_history = 0;
+	struct command *cmd;
+	
 
 	while (1) 
 	{
+		int count_command = 1;
 		int status = 0;
 		int command_counter = 0;
 		int in_background = 0;
@@ -174,6 +177,11 @@ int main(int argc, char* argv[])
 		if (run_history)
     {
         run_history=0;
+		count_command = 0;
+		if (cmd){
+			argvv=cmd->argvv;
+			command_counter = cmd->num_commands;
+		}
     }
     else{
         // Prompt 
@@ -294,32 +302,23 @@ int main(int argc, char* argv[])
 					}
 					fprintf(stderr,"\n");
             	}
-            
 			} else if (argvv[0][1] != NULL && atoi(argvv[0][1]) >= 0 && atoi(argvv[0][1]) < n_elem) {
-				    int index = atoi(argvv[0][1]);
-				    if (index >= 0 && index < n_elem) {
-				        fprintf(stderr, "Running command %d\n", index);
-				        struct command *cmd = &history[index];
-				        command_counter = history[index].num_commands;
-				        // Copiar los argumentos del comando del historial a argvv actual
-				        for (int i = 0; i < num_commands; i++) {
-				            for (int j = 0; j < history[index].args[i]; j++) {
-				                argvv[i][j] = history[index].argvv[i][j];
-				            }
-				            argvv[i][history[index].args[i]] = NULL;
-				        }
-				        run_history = 1;
-				    }
+				int index = atoi(argvv[0][1]);
+				if (index >= 0 && index < n_elem) {
+					fprintf(stderr, "Running command %d\n", index);
+					cmd = &history[index];
+					run_history = 1;
 				}
-				else {
+			} 
+			else {
 				// Error: comando fuera de rango
 				printf("ERROR: Command not found\n");
-				}
+
 			}
-		} 
+		}
 		else {
 			// Cada vez que se ejecuta un comando, se almacena en 'history'
-			if (n_elem < 20) {
+			if (n_elem < 20 && count_command) {
 				if (n_elem == 0) {
 					head = tail = 0; // Inicializar head y tail
 				}
@@ -329,14 +328,14 @@ int main(int argc, char* argv[])
 					n_elem++;
 				}
 			}
-			else {
+			else if (n_elem >= 20) {
 				free_command(&history[head]); // Eliminar comando en head
 				store_command(argvv, filev, in_background, &history[tail]);
 				head = (head + 1) % history_size;
 				tail = (tail + 1) % history_size;
 			}
 
-	
+
 			//simple commmand
 			if (command_counter == 1) {
 				int pid, status, fd=0;
